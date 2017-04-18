@@ -7,6 +7,7 @@
         <title>Lista de Contatos</title>
     </head>
     <body>
+        <%@include file="jspf/menu.jspf" %>
         <h1>Lista de Contatos</h1>
         <div style="color: red;">${mensagem}</div>
         <table>
