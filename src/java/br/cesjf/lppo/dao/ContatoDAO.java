@@ -2,22 +2,28 @@ package br.cesjf.lppo.dao;
 
 import br.cesjf.lppo.Contato;
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ContatoDAO {
+    private final PreparedStatement opListar;
+    private final PreparedStatement opNovo;
+
+    public ContatoDAO() throws Exception {
+        Connection conexao = ConnectionFactory.createConnection();
+        opListar = conexao.prepareStatement("SELECT * FROM contato");
+        opNovo = conexao.prepareStatement("INSERT INTO contato (nome, sobrenome, telefone) VALUES(?,?,?)");
+    }
+    
 
     public List<Contato> listAll() throws Exception {
         try {
             List<Contato> contatos = new ArrayList<>();
 
-            Connection conexao = ConnectionFactory.createConnection();
-            Statement operacao = conexao.createStatement();
-            ResultSet resultado = operacao.executeQuery("SELECT * FROM contato");
+            ResultSet resultado = opListar.executeQuery();
             while (resultado.next()) {
                 Contato novoContato = new Contato();
                 novoContato.setId(resultado.getLong("id"));
@@ -35,12 +41,11 @@ public class ContatoDAO {
 
     public void cria(Contato novoContato) throws Exception {
         try {
-            Connection conexao = ConnectionFactory.createConnection();
-            Statement operacao = conexao.createStatement();
-            operacao.executeUpdate("INSERT INTO contato(nome, sobrenome, telefone) VALUES('"
-                    + novoContato.getNome() + "','"
-                    + novoContato.getSobrenome() + "','"
-                    + novoContato.getTelefone() + "')");
+            opNovo.clearParameters();
+            opNovo.setString(1, novoContato.getNome());
+            opNovo.setString(2, novoContato.getSobrenome());
+            opNovo.setString(3, novoContato.getTelefone());
+            opNovo.executeUpdate();
         } catch (SQLException ex) {
             throw new Exception("Erro ao inserir o contato!", ex);
         }
